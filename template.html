@@ -99,7 +99,18 @@ section{display:grid;gap:14px}
 .team ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
 .team .used{font-size:.8rem;color:var(--muted)}
 .tasks{display:grid;gap:12px}
-.task{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:10px;min-width:0}
+.task{background:var(--panel);border:1px solid var(--line);border-radius:10px;min-width:0}
+.task>summary{list-style:none;cursor:pointer;padding:13px 16px 13px 40px;position:relative;border-radius:10px}
+.task>summary::-webkit-details-marker{display:none}
+.task>summary::before{content:"";position:absolute;left:18px;top:21px;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s}
+.task[open]>summary::before{transform:rotate(45deg);top:18px}
+.task>summary:hover{background:var(--bg)}
+.task>summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.task-body{display:grid;gap:10px;padding:0 16px 14px 40px;min-width:0}
+.task-tools{display:flex;gap:6px}
+.task-tools button{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:4px 11px;border-radius:99px;cursor:pointer}
+.task-tools button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.task>summary::before{transition:none}}
 .task.closed{opacity:.75}
 .task-h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;align-items:baseline}
 .task-h h3{margin:0;font-size:1rem;text-wrap:balance}
@@ -141,7 +152,8 @@ footer{font-size:.78rem;color:var(--muted)}
   <div class="tree" id="tree"></div>
 </section>
 <section>
-  <div><h2>워크트리별 진행 중인 작업</h2><p class="sub">각 워크트리의 최근 Claude 세션(14일 이내)에서 요청과 마지막 진행 상황을 뽑았습니다. 체크 표시는 이 브라우저에만 저장됩니다. 이어서 작업하려면 명령을 복사해 터미널에 붙여넣으세요.</p></div>
+  <div><h2>워크트리별 진행 중인 작업</h2><p class="sub">각 워크트리의 최근 Claude 세션(14일 이내)에서 요청과 마지막 진행 상황을 뽑았습니다. 제목을 누르면 펼쳐집니다. 체크 표시와 펼침 상태는 이 브라우저에만 저장됩니다. 이어서 작업하려면 명령을 복사해 터미널에 붙여넣으세요.</p></div>
+  <div class="task-tools"><button type="button" id="t-open">모두 펼치기</button><button type="button" id="t-close">모두 접기</button></div>
   <div class="tasks" id="tasks"></div>
 </section>
 <section>
@@ -191,12 +203,16 @@ const tasks=D.orca.tasks||[];
 $("tasks").innerHTML=tasks.length?tasks.map((t,i)=>{
  const st=t.working?'<span class="pill s-work">작업 중</span>':t.open?'<span class="pill s-live">세션 열림</span>':'<span class="pill s-idle">세션 닫힘</span>';
  const cmd=(t.path?`cd "${t.path}"; `:"")+`claude --resume ${t.id}`;
- return `<article class="task${t.open?"":" closed"}" data-id="${esc(t.id)}"><div class="task-h"><div><h3>${esc(t.title||t.prompts[0])}</h3><div class="task-where">${esc(t.repo)} · ${esc(t.worktree)}${t.branch?" · "+esc(t.branch):""}</div></div><div class="task-meta">${t.done?'<span class="pill s-idle">워크트리 완료</span>':""}${st}<span class="mono tcount">${esc(t.last)}</span></div></div>`+
+ return `<details class="task${t.open?"":" closed"}" data-id="${esc(t.id)}"><summary class="task-h"><div><h3>${esc(t.title||t.prompts[0])}</h3><div class="task-where">${esc(t.repo)} · ${esc(t.worktree)}${t.branch?" · "+esc(t.branch):""}</div></div><div class="task-meta">${t.done?'<span class="pill s-idle">워크트리 완료</span>':""}${st}<span class="mono tcount">${esc(t.last)}</span><span class="mono tcount">요청 ${t.prompts.length}</span></div></summary><div class="task-body">`+
  `<ul class="checks">${t.prompts.map((p,j)=>`<li><label><input type="checkbox" id="c-${esc(t.id)}-${j}" data-k="${j}"><span>${esc(p)}</span></label></li>`).join("")}</ul>`+
  (t.status?`<div class="progress"><b>마지막 진행 상황</b>${esc(t.status)}</div>`:"")+
- `<div class="resume"><code>${esc(cmd)}</code><button type="button" data-cmd="${esc(cmd)}">복사</button></div></article>`;}).join(""):'<div class="quiet">최근 14일 안에 진행된 세션이 없습니다.</div>';
+ `<div class="resume"><code>${esc(cmd)}</code><button type="button" data-cmd="${esc(cmd)}">복사</button></div></div></details>`;}).join(""):'<div class="quiet">최근 14일 안에 진행된 세션이 없습니다.</div>';
 document.querySelectorAll(".task").forEach(a=>{const k="acb-c-"+a.dataset.id,v=store.get(k)||{};
  a.querySelectorAll("input[type=checkbox]").forEach(cb=>{cb.checked=!!v[cb.dataset.k];cb.addEventListener("change",()=>{v[cb.dataset.k]=cb.checked;store.set(k,v)})});});
+const openSet=new Set(store.get("acb-open")||[]);
+document.querySelectorAll(".task").forEach(d=>{d.open=openSet.has(d.dataset.id);d.addEventListener("toggle",()=>{d.open?openSet.add(d.dataset.id):openSet.delete(d.dataset.id);store.set("acb-open",[...openSet])})});
+$("t-open").addEventListener("click",()=>document.querySelectorAll(".task").forEach(d=>d.open=true));
+$("t-close").addEventListener("click",()=>document.querySelectorAll(".task").forEach(d=>d.open=false));
 document.querySelectorAll(".resume button").forEach(b=>b.addEventListener("click",()=>{const done=()=>{b.textContent="복사됨";setTimeout(()=>b.textContent="복사",1500)};
  navigator.clipboard?navigator.clipboard.writeText(b.dataset.cmd).then(done,()=>{const r=document.createRange();r.selectNodeContents(b.previousElementSibling);getSelection().removeAllRanges();getSelection().addRange(r)}):null}));
 const L={live:"활성",recent:"최근",idle:"휴면"};
