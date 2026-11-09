@@ -30,7 +30,8 @@ def log(msg):
 
 
 def sh(args, cwd=None, timeout=60):
-    r = subprocess.run(args, cwd=cwd, capture_output=True, timeout=timeout)
+    flags = 0x08000000 if os.name == "nt" else 0  # CREATE_NO_WINDOW: 배치 중 콘솔 창이 뜨지 않게
+    r = subprocess.run(args, cwd=cwd, capture_output=True, timeout=timeout, creationflags=flags)
     return r.returncode, r.stdout.decode("utf-8", "replace"), r.stderr.decode("utf-8", "replace")
 
 
@@ -82,7 +83,7 @@ def auto_chain(path):
 
 
 PATH_RE = re.compile(r'"?[A-Za-z]:[\\/][^"\n]*?([^\\/"\n]+\.[A-Za-z0-9]{2,5})"?')
-NOISE = ("<local-command", "Caveat:", "[Request interrupted", "<task-notification", "<bash-")
+NOISE = ("<local-command", "Caveat:", "[Request interrupted", "<task-notification", "<bash-", "[SYSTEM NOTIFICATION")
 
 
 def clean_text(t, limit):
