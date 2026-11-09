@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>로컬 에이전트 관제판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 관제실 보드. 요약 계기판 → 경보 → 라이브 세션 트리 → 프로젝트별 파이프라인 레인 → 공용 에이전트 풀 → 정리 제안 */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --ink:#18212b; --muted:#5b6876; --line:#d9dfe5;
+  --accent:#1f5f8b; --accent-soft:#e3eef6;
+  --live:#1d8a52; --live-soft:#e1f3e9; --recent:#b07612; --recent-soft:#f8eed8; --idle:#8a96a3; --idle-soft:#eceff2;
+  --warn:#b4372f; --warn-soft:#f9e5e3;
+  --f-body:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f151b; --panel:#17202a; --ink:#e4e9ee; --muted:#93a1ae; --line:#2a3642;
+  --accent:#6fb0de; --accent-soft:#1a2f40;
+  --live:#4cc285; --live-soft:#14301f; --recent:#e0a643; --recent-soft:#33280f; --idle:#7c8996; --idle-soft:#1f2832;
+  --warn:#ef7a70; --warn-soft:#3a1c1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f151b; --panel:#17202a; --ink:#e4e9ee; --muted:#93a1ae; --line:#2a3642;
+  --accent:#6fb0de; --accent-soft:#1a2f40;
+  --live:#4cc285; --live-soft:#14301f; --recent:#e0a643; --recent-soft:#33280f; --idle:#7c8996; --idle-soft:#1f2832;
+  --warn:#ef7a70; --warn-soft:#3a1c1a; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:grid;gap:34px}
+h1{font-size:1.75rem;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:1.1rem;margin:0 0 4px;text-wrap:balance}
+.sub{color:var(--muted);margin:0;font-size:.9rem}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+header{display:grid;gap:6px}
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.gauge{background:var(--panel);padding:14px 16px;display:grid;gap:2px}
+.gauge b{font-family:var(--f-mono);font-size:1.7rem;font-weight:600;line-height:1.1}
+.gauge span{font-size:.82rem;color:var(--muted)}
+.gauge.warn b{color:var(--warn)}
+.alert{display:grid;gap:8px}
+.alert div{background:var(--warn-soft);border-left:3px solid var(--warn);padding:10px 14px;border-radius:4px;font-size:.92rem}
+.alert div.info{background:var(--accent-soft);border-left-color:var(--accent)}
+section{display:grid;gap:14px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+.pill{font-family:var(--f-mono);font-size:.7rem;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.s-live{background:var(--live-soft);color:var(--live)} .s-live .dot,.dot.s-live{background:var(--live)}
+.s-recent{background:var(--recent-soft);color:var(--recent)}
+.s-idle{background:var(--idle-soft);color:var(--idle)}
+/* live tree */
+.tree{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:14px}
+.repo{display:grid;gap:8px}
+.repo-h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.repo-h strong{font-size:1rem}
+.wts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;padding-left:14px;border-left:2px solid var(--line)}
+.wt{border:1px solid var(--line);border-radius:6px;padding:9px 11px;display:grid;gap:4px;min-width:0}
+.wt-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.wt-name{font-weight:500;font-size:.88rem;overflow-wrap:anywhere}
+.term{display:flex;gap:7px;align-items:center;font-size:.82rem;color:var(--muted)}
+.term .dot{background:var(--live)}
+.term.self .dot{background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.wt.done{opacity:.6}
+.quiet{font-size:.8rem;color:var(--muted)}
+.pill.new{background:var(--accent-soft);color:var(--accent)}
+.wt-none{font-size:.8rem;color:var(--idle)}
+/* projects */
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filters button{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:5px 12px;border-radius:99px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filters button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lanes{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.lane{display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:14px;padding:13px 16px;border-top:1px solid var(--line);align-items:start}
+.lane:first-child{border-top:0}
+.org-h{display:flex;justify-content:space-between;gap:8px;padding:10px 16px;background:var(--bg);border-top:1px solid var(--line);font-weight:700;font-size:.9rem}
+.org-h:first-child{border-top:0;border-radius:10px 10px 0 0}
+.org-h span{font-family:var(--f-mono);font-weight:400;font-size:.75rem;color:var(--muted)}
+.lane-meta{display:grid;gap:3px;min-width:0}
+.lane-meta strong{font-size:.93rem;overflow-wrap:anywhere}
+.lane-meta .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lane-meta small{color:var(--muted);font-size:.78rem}
+.chain{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center;min-width:0}
+.node{font-size:.8rem;padding:4px 9px;border-radius:5px;border:1px solid var(--line);background:var(--bg);white-space:nowrap}
+.node.opus{border-color:var(--accent);color:var(--accent)}
+.node.shared{background:var(--accent-soft);border-color:transparent}
+.node.ext{border-style:dashed}
+.arr{color:var(--idle);font-size:.8rem}
+.cmd{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.78rem;color:var(--muted)}
+.legend span{display:flex;gap:6px;align-items:center}
+/* pool */
+.pool{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.team{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:8px;align-content:start}
+.team h3{margin:0;font-size:.95rem}
+.team ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.team .used{font-size:.8rem;color:var(--muted)}
+/* table */
+.tbl{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:620px}
+th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--line);vertical-align:top}
+th{border-top:0;font-weight:500;color:var(--muted);font-size:.78rem}
+footer{font-size:.78rem;color:var(--muted)}
+@media (max-width:640px){.lane{grid-template-columns:1fr;gap:8px}.wts{padding-left:10px}}
+@media (prefers-reduced-motion:no-preference){.term.self .dot{animation:pulse 1.8s ease-in-out infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px transparent}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow" id="stamp"></div>
+  <h1>로컬 에이전트 관제판</h1>
+  <p class="sub">Orca 워크트리·터미널, 프로젝트 폴더의 에이전트 정의, 전역 에이전트(~/.claude/agents)를 한 장으로 모았습니다. 매일 08:00에 자동 갱신됩니다.</p>
+</header>
+<div class="gauges" id="gauges"></div>
+<div class="alert" id="alerts"></div>
+<section>
+  <div><h2>지금 Orca에서 돌고 있는 세션</h2><p class="sub">워크트리별로 열린 터미널과 마지막 출력 시각.</p></div>
+  <div class="tree" id="tree"></div>
+</section>
+<section>
+  <div><h2>프로젝트별 에이전트 구성</h2><p class="sub">조직별로 묶었습니다. 상태는 폴더 안 파일의 마지막 수정일 기준이며, 휴면도 관리 대상으로 계속 표시합니다. 활성은 최근 7일, 최근은 90일 이내, 휴면은 그보다 오래된 것.</p></div>
+  <div class="filters" role="group" aria-label="상태 필터">
+    <button type="button" id="f-all" data-f="all" aria-pressed="true">전체</button>
+    <button type="button" id="f-live" data-f="live" aria-pressed="false">활성</button>
+    <button type="button" id="f-recent" data-f="recent" aria-pressed="false">최근</button>
+    <button type="button" id="f-idle" data-f="idle" aria-pressed="false">휴면</button>
+  </div>
+  <div class="legend">
+    <span><span class="node">에이전트</span> 프로젝트 전용</span>
+    <span><span class="node opus">Opus</span> Opus·확장 사고 단계</span>
+    <span><span class="node shared">공용</span> 전역 에이전트·Orca 세션</span>
+    <span><span class="node ext">스크립트</span> 코드·외부 도구 단계</span>
+  </div>
+  <div class="lanes" id="lanes"></div>
+</section>
+<section>
+  <div><h2>공용 에이전트 풀</h2><p class="sub">~/.claude/agents. 어느 폴더에서든 호출됩니다.</p></div>
+  <div class="pool" id="pool"></div>
+</section>
+<section>
+  <div><h2>정리 제안</h2><p class="sub">갱신 시점 데이터로 자동 생성됩니다.</p></div>
+  <div class="tbl"><table><thead><tr><th>대상</th><th>현재</th><th>제안</th><th>효과</th></tr></thead><tbody id="sug"></tbody></table></div>
+</section>
+<footer>출처: <span class="mono">orca worktree list</span>, <span class="mono">orca terminal list</span>, <span class="mono">tasklist</span>, 각 프로젝트 폴더. 갱신 배치: <span class="mono">agent-control-board/run.py</span></footer>
+</div>
+<script>
+const D=/*__DATA__*/null;
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=id=>document.getElementById(id);
+const c=D.counts;
+$("stamp").textContent="마지막 갱신 "+D.generated+(D.orca.stale?" · Orca 데이터는 이전 값":"");
+$("gauges").innerHTML=[[c.projects,"로컬 프로젝트 폴더"],[c.projectAgents,"프로젝트 전용 에이전트"],[c.globalAgents,"전역 공용 에이전트"],[c.claude,"열린 Claude 세션 (Orca)",c.claude>c.limit],[c.gemini,"열린 Gemini 세션"]]
+ .map(([v,l,w])=>`<div class="gauge${w?" warn":""}"><b>${v}</b><span>${esc(l)}</span></div>`).join("");
+$("alerts").innerHTML=D.alerts.map(a=>`<div class="${a.level==="info"?"info":""}">${esc(a.text)}</div>`).join("");
+const term=t=>`<div class="term"><span class="dot" style="background:var(${t.working?"--accent":"--live"})"></span>${esc(t.title)}${t.agent!=="claude"?" ["+esc(t.agent)+"]":""} <span class="mono">${esc(t.last)}</span></div>`;
+const stCls=s=>s==="completed"?"s-idle":"s-live", stTxt=s=>({completed:"완료","in-progress":"진행","in-review":"리뷰",todo:"대기"}[s]||s);
+let tree=D.orca.repos.map(r=>`<div class="repo"><div class="repo-h"><span class="dot ${r.sessions?"s-live":"s-recent"}" style="background:var(${r.sessions?"--live":"--recent"})"></span><strong>${esc(r.name)}</strong><span class="cmd">워크트리 ${r.worktrees.length}개 · 세션 ${r.sessions}개</span></div><div class="wts">`+
+ r.worktrees.map(w=>`<div class="wt${w.status==="completed"?" done":""}"><div class="wt-top"><span class="wt-name">${esc(w.name)}</span><span class="pill ${stCls(w.status)}">${stTxt(w.status)}</span></div>${w.terms.length?w.terms.map(term).join(""):`<div class="wt-none">열린 터미널 없음 · 마지막 활동 ${esc(w.last)}</div>`}</div>`).join("")+`</div></div>`).join("");
+if(D.orca.loose.length)tree+=`<div class="repo"><div class="repo-h"><span class="dot" style="background:var(--live)"></span><strong>워크트리에 묶이지 않은 세션</strong><span class="cmd">${D.orca.loose.length}개</span></div><div class="wts">${D.orca.loose.map(t=>`<div class="wt">${term(t)}</div>`).join("")}</div></div>`;
+if(D.orca.quiet&&D.orca.quiet.length)tree+=`<div class="quiet">90일 넘게 활동 없는 저장소: ${D.orca.quiet.map(esc).join(", ")}</div>`;
+$("tree").innerHTML=tree||'<div class="quiet">Orca 데이터가 없습니다.</div>';
+const L={live:"활성",recent:"최근",idle:"휴면"};
+const lane=p=>{
+ const chain=p.ch.length?p.ch.map(([t,k])=>`<span class="node ${k}">${esc(t)}</span>`).join('<span class="arr">→</span>'):'<span class="cmd">에이전트 정의 없음</span>';
+ return `<div class="lane" data-s="${p.s}"><div class="lane-meta"><div class="row"><strong>${esc(p.n)}</strong>${p.new?'<span class="pill new">새 폴더</span>':""}</div><div class="row"><span class="pill s-${p.s}">${L[p.s]}</span><small class="mono">${p.d}</small></div><span class="cmd">${esc(p.c)}</span></div><div class="chain">${chain}</div></div>`;};
+const orgs=[...new Set([...(D.orgs||[]),...D.projects.map(p=>p.org)])];
+$("lanes").innerHTML=orgs.map(o=>{const ps=D.projects.filter(p=>p.org===o);if(!ps.length)return"";const live=ps.filter(p=>p.s==="live").length;
+ return `<div class="org-h" data-org>${esc(o)}<span>프로젝트 ${ps.length}개 · 활성 ${live}개</span></div>`+ps.map(lane).join("");}).join("");
+$("pool").innerHTML=D.pool.map(t=>`<div class="team"><h3>${esc(t.team)}</h3><ul>${t.agents.map(a=>`<li class="node shared">${esc(a.replace(/^impeccable-/,""))}</li>`).join("")}</ul><div class="used">사용처: ${esc(t.used)}</div></div>`).join("");
+$("sug").innerHTML=D.suggestions.length?D.suggestions.map(r=>"<tr>"+r.map(x=>`<td>${esc(x)}</td>`).join("")+"</tr>").join(""):'<tr><td colspan="4">정리할 항목이 없습니다.</td></tr>';
+let saved="all";try{saved=localStorage.getItem("acb-f")||"all"}catch(e){}
+function apply(f){document.querySelectorAll(".filters button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.f===f));document.querySelectorAll(".lane").forEach(r=>r.hidden=!(f==="all"||r.dataset.s===f));document.querySelectorAll("[data-org]").forEach(h=>{let n=h.nextElementSibling,any=false;while(n&&!n.hasAttribute("data-org")){if(!n.hidden)any=true;n=n.nextElementSibling}h.hidden=!any});try{localStorage.setItem("acb-f",f)}catch(e){}}
+document.querySelectorAll(".filters button").forEach(b=>b.addEventListener("click",()=>apply(b.dataset.f)));
+apply(saved);
+</script>
+</body>
+</html>
