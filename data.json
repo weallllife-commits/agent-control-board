@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-09 10:05",
+ "generated": "2026-11-09 10:06",
  "counts": {
   "projects": 22,
   "projectAgents": 21,
@@ -236,7 +236,7 @@
    },
    {
     "title": "/orchestration 기반 로컬 에이전트 관리",
-    "last": "11-09 10:05",
+    "last": "11-09 10:06",
     "agent": "claude",
     "working": true
    },
