@@ -6,9 +6,11 @@
 import datetime as dt
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
+import time
 from collections import Counter
 from pathlib import Path
 
@@ -79,6 +81,76 @@ def auto_chain(path):
     return chain
 
 
+PATH_RE = re.compile(r'"?[A-Za-z]:[\\/][^"\n]*?([^\\/"\n]+\.[A-Za-z0-9]{2,5})"?')
+NOISE = ("<local-command", "Caveat:", "[Request interrupted", "<task-notification", "<bash-")
+
+
+def clean_text(t, limit):
+    t = PATH_RE.sub(lambda m: f"[{m.group(1)}]", t)
+    m = re.search(r"<command-name>(.*?)</command-name>.*?<command-args>(.*?)</command-args>", t, re.S)
+    if m:
+        t = f"{m.group(1)} {m.group(2)}"
+    t = re.sub(r"<[^>]+>", "", t)
+    t = re.sub(r"\s+", " ", t).strip()
+    return t if len(t) <= limit else t[:limit].rstrip() + "…"
+
+
+def collect_sessions(days=14):
+    """~/.claude/projects 대화 기록에서 세션별 제목·요청·마지막 진행 상황을 뽑는다."""
+    cutoff = time.time() - days * 86400
+    out = []
+    for f in (HOME / ".claude" / "projects").glob("*/*.jsonl"):
+        if f.stat().st_mtime < cutoff:
+            continue
+        s = {"id": f.stem, "title": "", "cwd": "", "branch": "", "prompts": [], "status": "", "ts": ""}
+        try:
+            lines = f.open(encoding="utf-8")
+            for line in lines:
+                try:
+                    d = json.loads(line)
+                except ValueError:
+                    continue
+                kind = d.get("type")
+                if kind == "ai-title":
+                    s["title"] = d.get("aiTitle", "")
+                elif kind == "custom-title":
+                    s["title"] = d.get("customTitle", "") or s["title"]
+                if kind not in ("user", "assistant") or d.get("isSidechain"):
+                    continue
+                s["cwd"] = s["cwd"] or (d.get("cwd") or "").replace("\\", "/").rstrip("/")
+                s["branch"] = d.get("gitBranch") or s["branch"]
+                s["ts"] = d.get("timestamp") or s["ts"]
+                content = d.get("message", {}).get("content")
+                if kind == "user" and not d.get("isMeta"):
+                    text = content if isinstance(content, str) else " ".join(
+                        c.get("text", "") for c in content or [] if isinstance(c, dict) and c.get("type") == "text")
+                    if text and not text.lstrip().startswith(NOISE) and "system-reminder" not in text[:40]:
+                        p = clean_text(text, 160)
+                        if len(p) >= 4 and (not s["prompts"] or s["prompts"][-1] != p):
+                            s["prompts"].append(p)
+                elif kind == "assistant" and isinstance(content, list):
+                    text = "\n".join(c.get("text", "") for c in content if c.get("type") == "text").strip()
+                    if len(text) > 20:
+                        s["status"] = text
+        except OSError:
+            continue
+        if not s["prompts"]:
+            continue
+        s["status"] = clean_text(s["status"], 420)
+        s["prompts"] = s["prompts"][-6:]
+        s["last"] = fmt_iso(s["ts"])
+        out.append(s)
+    out.sort(key=lambda s: s["ts"])
+    return out
+
+
+def fmt_iso(ts):
+    try:
+        return dt.datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone().strftime("%m-%d %H:%M")
+    except ValueError:
+        return "-"
+
+
 # ---------- 수집 ----------
 def collect_orca(prev):
     wts = orca("worktree", "list")
@@ -124,6 +196,7 @@ def collect_orca(prev):
             "status": w.get("workspaceStatus") or "in-progress",
             "last": fmt_ts(w.get("lastActivityAt")),
             "lastMs": w.get("lastActivityAt") or 0,
+            "path": path,
             "terms": by_path.pop(path, []),
         })
     for r in repos.values():
@@ -136,7 +209,32 @@ def collect_orca(prev):
     active.sort(key=lambda r: -r["sessions"])
     loose = [t for p, ts in by_path.items() for t in ts]
     dupes = sorted(n for n, c in seen_names.items() if c > 1)
-    return {"ok": True, "stale": False, "repos": active, "quiet": quiet, "loose": loose,
+
+    # 워크트리·세션별 진행 중인 작업: 터미널 제목 = 세션 제목으로 우선 매칭, 없으면 같은 폴더의 최신 세션
+    sess = collect_sessions()
+    by_title = {s["title"]: s for s in sess if s["title"]}
+    by_cwd = {s["cwd"]: s for s in sess}
+    tasks, used = [], set()
+
+    def add(repo, wt, path, terms, done=False):
+        found = [by_title[t["title"]] for t in terms if t["title"] in by_title] or \
+                ([by_cwd[path]] if path in by_cwd else [])
+        for s in found:
+            if s["id"] in used:
+                continue
+            used.add(s["id"])
+            tasks.append({"repo": repo, "worktree": wt, "path": path or s["cwd"], "done": done,
+                          "open": bool(terms), "working": any(t["working"] for t in terms), **s})
+
+    for r in active:
+        for w in r["worktrees"]:
+            add(r["name"], w["name"], w["path"], w["terms"], w["status"] == "completed")
+    for t in loose:
+        add("워크트리 없음", t["title"], "", [t])
+    tasks = sorted(tasks, key=lambda t: t["ts"], reverse=True)
+    tasks.sort(key=lambda t: (not t["working"], not t["open"], t["done"]))
+
+    return {"ok": True, "stale": False, "repos": active, "quiet": quiet, "loose": loose, "tasks": tasks,
             "stray": sorted(stray), "dupes": dupes,
             "completed": [x["name"] for r in active for x in r["worktrees"] if x["status"] == "completed"]}
 
