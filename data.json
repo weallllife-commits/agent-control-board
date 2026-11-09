@@ -1,10 +1,10 @@
 {
- "generated": "2026-11-09 11:00",
+ "generated": "2026-11-09 11:08",
  "counts": {
   "projects": 22,
   "projectAgents": 21,
   "globalAgents": 12,
-  "claude": 9,
+  "claude": 8,
   "gemini": 0,
   "limit": 2
  },
@@ -19,7 +19,7 @@
  "alerts": [
   {
    "level": "warn",
-   "text": "Claude 동시 세션 9개. 운용 원칙은 동시 2개 이하입니다. claude.exe 프로세스 19개."
+   "text": "Claude 동시 세션 8개. 운용 원칙은 동시 2개 이하입니다. claude.exe 프로세스 18개."
   },
   {
    "level": "info",
@@ -122,54 +122,10 @@
       "last": "11-05 00:59",
       "lastMs": 1793807940248,
       "path": "C:/Users/manid/orca/workspaces/allergy-finder/lobster",
-      "terms": [
-       {
-        "title": "/find-skills UXUI 개선 스킬",
-        "last": "11-09 10:57",
-        "agent": "claude",
-        "working": false
-       }
-      ]
-     }
-    ],
-    "sessions": 6
-   },
-   {
-    "name": "manid",
-    "worktrees": [
-     {
-      "name": "main",
-      "status": "in-progress",
-      "last": "11-06 13:56",
-      "lastMs": 1793941017980,
-      "path": "C:/Users/manid/.gemini/history/manid",
-      "terms": [
-       {
-        "title": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-        "last": "11-09 10:28",
-        "agent": "shell",
-        "working": true
-       }
-      ]
-     },
-     {
-      "name": "힐스커버리",
-      "status": "in-progress",
-      "last": "11-06 13:17",
-      "lastMs": 1793938637328,
-      "path": "C:/Users/manid/orca/workspaces/manid/힐스커버리",
-      "terms": []
-     },
-     {
-      "name": "비프바 마케팅",
-      "status": "in-progress",
-      "last": "11-05 17:06",
-      "lastMs": 1793866000940,
-      "path": "C:/Users/manid/orca/workspaces/manid/비프바-CRM마케팅",
       "terms": []
      }
     ],
-    "sessions": 1
+    "sessions": 5
    },
    {
     "name": "marketing-asset",
@@ -234,13 +190,43 @@
      }
     ],
     "sessions": 0
+   },
+   {
+    "name": "manid",
+    "worktrees": [
+     {
+      "name": "main",
+      "status": "in-progress",
+      "last": "11-06 13:56",
+      "lastMs": 1793941017980,
+      "path": "C:/Users/manid/.gemini/history/manid",
+      "terms": []
+     },
+     {
+      "name": "힐스커버리",
+      "status": "in-progress",
+      "last": "11-06 13:17",
+      "lastMs": 1793938637328,
+      "path": "C:/Users/manid/orca/workspaces/manid/힐스커버리",
+      "terms": []
+     },
+     {
+      "name": "비프바 마케팅",
+      "status": "in-progress",
+      "last": "11-05 17:06",
+      "lastMs": 1793866000940,
+      "path": "C:/Users/manid/orca/workspaces/manid/비프바-CRM마케팅",
+      "terms": []
+     }
+    ],
+    "sessions": 0
    }
   ],
   "quiet": [],
   "loose": [
    {
     "title": "Claude Code",
-    "last": "11-09 10:57",
+    "last": "11-09 11:05",
     "agent": "claude",
     "working": false
    },
@@ -251,38 +237,8 @@
     "working": false
    },
    {
-    "title": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-    "last": "11-09 10:16",
-    "agent": "shell",
-    "working": true
-   },
-   {
-    "title": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-    "last": "11-09 10:16",
-    "agent": "shell",
-    "working": true
-   },
-   {
-    "title": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-    "last": "11-09 10:15",
-    "agent": "shell",
-    "working": true
-   },
-   {
-    "title": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-    "last": "11-09 10:16",
-    "agent": "shell",
-    "working": true
-   },
-   {
-    "title": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
-    "last": "11-09 10:16",
-    "agent": "shell",
-    "working": true
-   },
-   {
     "title": "/orchestration 기반 로컬 에이전트 관리",
-    "last": "11-09 11:00",
+    "last": "11-09 11:08",
     "agent": "claude",
     "working": true
    }
@@ -303,34 +259,13 @@
      "하나의 에이전트를 활용해서 현재 local에서 진행되고 있는 프로젝트 에이전트를 한 번에 관리하려고 하는데 필요한 skills 가 있다면 /find-skills 에서 찾아서 사용하고 당연히 /orchestration 활용해서 효율적인 토큰 활용을 진행해. 현재 내가 어떤 프로젝트들을 진…",
      "이 관제판은 git에서 퍼블리싱해서 다른 브라우져에서도 볼 수 있게 작업해. 정기적으로 업데이트 될 수 있게 배치 규칙 정하자. 매일 아침 8시에 업데이트 되도록 하자.",
      "세션 일부 닫았어 상황판 업데이트 해주고. 각 워크트리별로 진행중인 task내용 resume 해서 대시보드에서 체크할 수 있게 업데이트해줘.",
-     "그대로 공개. 그리고 각 워크스트이션 리캡한 내용은 토글 형태로 접었다 펼수 있게 수정해."
+     "그대로 공개. 그리고 각 워크스트이션 리캡한 내용은 토글 형태로 접었다 펼수 있게 수정해.",
+     "세션 열려 있지만 작업하지 않을 워크스페이셔를 닫으려면 어떻게 해야해?",
+     "빈 PowerShell이랑 lobster 닫아줘"
     ],
-    "status": "관제판을 다시 갱신하고 \"워크트리별 진행 중인 작업\" 섹션을 새로 붙여 배포했습니다. GitHub Pages 반영은 1~2분 걸립니다. http[weallllife-commits.github.io]/agent-control-board/ **세션 수:** Claude 세션은 11개에서 9개로 줄었습니다. 운용 원칙(2개)보다는 아직 많아서 경보는 계속 떠 있습니다. **새 섹션에서 볼 수 있는 것** | 항목 | 내용 | |---|---| | 대상 | Orca 워크트리마다 최근 14일 안의 Claude 세션. 지금 12건 | | 정렬 | 작업 중 → 세션 열림 → 세션 닫힘 순 | | 요청 체크리스트 | 그 세션에서 요청한 내용 최근 6개. 체크한 상태는 그 브라우저에만 저장됩니다 | | 마지막 진행 상황 | Claude가 마지막으로 보고한 내…",
-    "ts": "2026-11-09T02:00:13.199Z",
-    "last": "11-09 11:00"
-   },
-   {
-    "repo": "manid",
-    "worktree": "main",
-    "path": "C:/Users/manid/.gemini/history/manid",
-    "done": false,
-    "open": true,
-    "working": true,
-    "id": "d87b73d3-7c08-492b-8e6e-eed67522d861",
-    "title": "회원·결제·KDT 어드민 데이터마트",
-    "cwd": "C:/Users/manid/.gemini/history/manid",
-    "branch": "main",
-    "prompts": [
-     "파일들 비밀번호는 동일해 'likelion' dldi",
-     "만들어진 데이터마트로 EDA를 실행해. 실행한 분석 내용은 데이터프레임 형태로 봐야하니깐 구글스프레드로 정리하고 내가 볼 수 있게 링크 출력해. 너무 무거우면 안되니깐 데이터마트에서 데이터를 호출하는 방식으로 분석된 결과문서는 따로 생성해야해.",
-     "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation. Summary:…",
-     "[13 지원취소 사유] 통계에서 '다른 부트캠프 지원 희망' 통계에 해당하는 건수와 완료후취소 유저 데이터 테이블 추출해줘. FGI 진행할거야. 마케팅 퍼미션 표기해서 추출해주면 활용할게.",
-     "연락대상은 당연히 마케팅수신동의자에게 해야하고 그럼 44명이 대상이될 것 같아. 샘플링은 n=10을 목표로 진행할거야. 아웃콜로 진행할건데 이거 할 때 사용할 스크립트를 작성해줘. FGI는 아니고 1:1유선인터뷰 형태로 진행하려고해.",
-     "A그룹에서 아웃콜을 진행한다면 어떤 질문을 하는게 좋을까? 질문수는 많지 않아야해 최대 3개 이내로 설계하는게 좋겠어. 3분 이내로 통화가 종료 될 수 있도록. 그리고 전화에 대한 경계심을 무너트릴 수 있는 도입스크립트가 엄청나게 중요할거야. 정리해서 MD문서로 정리해줘."
-    ],
-    "status": "A그룹용 3분 아웃콜 스크립트를 `[outcall-a-group-3min.md]`에 정리했어요. A그룹은 30명이고, n=10 중 6~7명을 맡는 그룹이에요. ## 질문 3개 질문 순서는 사실 → 이유 → 개선이에요. 대답하기 쉬운 질문부터 해야 마지막 질문에서 솔직한 답이 나와요. | # | 질문 | 시간 | 알고 싶은 것 | |---|---|---|---| | Q1 | \"지금은 어디서 공부하고 계세요? 어느 부트캠프로 가셨는지 여쭤봐도 될까요?\" | 30초 | 어디로 갔는지 (긴장 풀기용) | | **Q2** | **\"그곳으로 마음을 정하신 결정적인 이유 하나만 꼽는다면 뭐였어요?\"** | 60초 | **핵심.** 꼬리질문은 1번만 해요 (예: \"합격 연락이 그쪽에서 먼저 왔나요?\") | | Q3 | \"그때 멋사가 딱 하나만 달랐다면 남으…",
-    "ts": "2026-11-06T04:56:56.332Z",
-    "last": "11-06 13:56"
+    "status": "세션은 닫아도 대화가 저장되어서, 나중에 관제판의 `claude --resume` 명령으로 그대로 이어갈 수 있습니다. 방법은 세 가지입니다. **방법 1. Orca 화면에서 닫기** 1. 그 터미널의 Claude에게 \"지금까지 상황 핸드오프 메모로 남겨줘\"라고 한 줄 보냅니다. 마무리하지 않은 작업이 있을 때만 하면 됩니다. 2. `/exit`을 입력합니다. Ctrl+C를 두 번 눌러도 됩니다. 3. 터미널 탭을 닫습니다. `/exit`만 하면 Claude는 끝나도 PowerShell 창이 남습니다. 지금 아무것도 돌지 않는 PowerShell 터미널이 6개 열려 있는데, 이전에 닫은 세션들이 남긴 것으로 보입니다. **방법 2. 명령으로 닫기** ``` orca terminal close --worktree \"name:그로스파트\" --al…",
+    "ts": "2026-11-09T02:08:19.097Z",
+    "last": "11-09 11:08"
    },
    {
     "repo": "allergy-finder",
@@ -465,27 +400,27 @@
     "last": "10-30 11:38"
    },
    {
-    "repo": "allergy-finder",
-    "worktree": "Onboarding tutorial deploy",
-    "path": "C:/Users/manid/orca/workspaces/allergy-finder/lobster",
-    "done": true,
-    "open": true,
+    "repo": "manid",
+    "worktree": "main",
+    "path": "C:/Users/manid/.gemini/history/manid",
+    "done": false,
+    "open": false,
     "working": false,
-    "id": "08b9d64b-5dd3-437d-8765-c2beb1049376",
-    "title": "/find-skills UXUI 개선 스킬",
-    "cwd": "C:/Users/manid/orca/workspaces/allergy-finder/lobster",
-    "branch": "weallllife-commits/design-v3",
+    "id": "d87b73d3-7c08-492b-8e6e-eed67522d861",
+    "title": "회원·결제·KDT 어드민 데이터마트",
+    "cwd": "C:/Users/manid/.gemini/history/manid",
+    "branch": "main",
     "prompts": [
-     "로고의 오브제틑 변경되면 안되지 않아? 장바구니가 브랜드로고로 인지될 수 있을 것 같은데 확인해줘. 컬러변경은 가능해. 1. 운영 적용 하되 멍트리는 크리스마스 시즌 톤앤무드를 유지하자. 2. 확인했어. 한가지는 좀 더 고민하고 알려줘. 교차오염 고지> 시설 주의 의 경우엔 시설 주의가…",
+     "파일들 비밀번호는 동일해 'likelion' dldi",
+     "만들어진 데이터마트로 EDA를 실행해. 실행한 분석 내용은 데이터프레임 형태로 봐야하니깐 구글스프레드로 정리하고 내가 볼 수 있게 링크 출력해. 너무 무거우면 안되니깐 데이터마트에서 데이터를 호출하는 방식으로 분석된 결과문서는 따로 생성해야해.",
      "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation. Summary:…",
-     "변경되는 디자인 시안을 목업 형태로 보여줘. 모바일 기준으로 보여주면 돼.",
-     "오.. 너무 컨셉에 잡아 먹힌것 같아. 그래도 좀 더 프로페셔널한 느낌을 줘야하는데 너무 장난감 같아. [Image #1] [Image #2] [Image #3] [Image #4] [Image #5] [Image #6] 토스커머스를 레퍼런스 삼아서 전체적인 미감을 디밸롭하자. 여기에…",
-     "확인했어. 디자인 리뉴얼 작업 실행하고 실서버 배포까지 완료하자.",
-     "응, 아이콘이랑 제품 목록 페이지도 v3로 맞춰줘"
+     "[13 지원취소 사유] 통계에서 '다른 부트캠프 지원 희망' 통계에 해당하는 건수와 완료후취소 유저 데이터 테이블 추출해줘. FGI 진행할거야. 마케팅 퍼미션 표기해서 추출해주면 활용할게.",
+     "연락대상은 당연히 마케팅수신동의자에게 해야하고 그럼 44명이 대상이될 것 같아. 샘플링은 n=10을 목표로 진행할거야. 아웃콜로 진행할건데 이거 할 때 사용할 스크립트를 작성해줘. FGI는 아니고 1:1유선인터뷰 형태로 진행하려고해.",
+     "A그룹에서 아웃콜을 진행한다면 어떤 질문을 하는게 좋을까? 질문수는 많지 않아야해 최대 3개 이내로 설계하는게 좋겠어. 3분 이내로 통화가 종료 될 수 있도록. 그리고 전화에 대한 경계심을 무너트릴 수 있는 도입스크립트가 엄청나게 중요할거야. 정리해서 MD문서로 정리해줘."
     ],
-    "status": "앱 아이콘과 전체 제품 목록 페이지도 v3로 바꿔 실서버에 배포했습니다(`c75e102`). 실서버에서 목록 페이지에 새 구조가 들어간 것, 아이콘 파일이 코발트로 바뀐 것을 확인했습니다. 로직 테스트와 화면 점검은 배포 전에 모두 통과했습니다. ## 앱 아이콘 - **모양은 그대로 두고 색만 바꿨습니다.** 청록 바탕은 코발트로, 코랄 체크는 노랑으로 바꿨고 돋보기는 흰색 그대로입니다. 테두리의 부드러운 경계도 원래대로 유지됩니다. - 파비콘, 홈 화면 아이콘(iOS·Android), 검색결과에 쓰이는 로고까지 아이콘 파일 5개를 모두 바꿨습니다. - 앱 실행 화면 바탕색과 상단 막대 색도 흰색으로 맞췄습니다. ## 전체 제품 목록 (`/products/`) | 전 | 후 | |---|---| | 글자만 있는 로고 | 로고 마크 + 이름 |…",
-    "ts": "2026-11-04T15:58:59.942Z",
-    "last": "11-05 00:58"
+    "status": "A그룹용 3분 아웃콜 스크립트를 `[outcall-a-group-3min.md]`에 정리했어요. A그룹은 30명이고, n=10 중 6~7명을 맡는 그룹이에요. ## 질문 3개 질문 순서는 사실 → 이유 → 개선이에요. 대답하기 쉬운 질문부터 해야 마지막 질문에서 솔직한 답이 나와요. | # | 질문 | 시간 | 알고 싶은 것 | |---|---|---|---| | Q1 | \"지금은 어디서 공부하고 계세요? 어느 부트캠프로 가셨는지 여쭤봐도 될까요?\" | 30초 | 어디로 갔는지 (긴장 풀기용) | | **Q2** | **\"그곳으로 마음을 정하신 결정적인 이유 하나만 꼽는다면 뭐였어요?\"** | 60초 | **핵심.** 꼬리질문은 1번만 해요 (예: \"합격 연락이 그쪽에서 먼저 왔나요?\") | | Q3 | \"그때 멋사가 딱 하나만 달랐다면 남으…",
+    "ts": "2026-11-06T04:56:56.332Z",
+    "last": "11-06 13:56"
    },
    {
     "repo": "manid",
@@ -549,6 +484,29 @@
     "status": "GA4 이벤트를 이름·설명·매개변수까지 한곳에 정리한 사전 문서는 없어요. 저장소와 옵시디언 볼트(`반려동물-비즈니스`)를 모두 찾아봤어요. 가장 가까운 문서는 아래 세 개예요. | 문서 | 담긴 내용 | 빠진 부분 | |---|---|---| | `tools/gtm/README.md:38` | 사이트 코드가 GA4로 보내는 이벤트 **30종 이름 전체** + GTM으로 넘기는 변수 11개(`product_id`·`status`·`location`·`type`·`step`·`action`·`key`·`count`·`source`·`onb_variant`·`variant`) | 이벤트마다 언제 발생하는지, 어떤 매개변수가 붙는지 | | `README.md:210` | 탐색기 이벤트 일부와 매개변수 (`select_allergen`(key·act…",
     "ts": "2026-10-28T09:33:43.437Z",
     "last": "10-28 18:33"
+   },
+   {
+    "repo": "allergy-finder",
+    "worktree": "Onboarding tutorial deploy",
+    "path": "C:/Users/manid/orca/workspaces/allergy-finder/lobster",
+    "done": true,
+    "open": false,
+    "working": false,
+    "id": "08b9d64b-5dd3-437d-8765-c2beb1049376",
+    "title": "/find-skills UXUI 개선 스킬",
+    "cwd": "C:/Users/manid/orca/workspaces/allergy-finder/lobster",
+    "branch": "weallllife-commits/design-v3",
+    "prompts": [
+     "로고의 오브제틑 변경되면 안되지 않아? 장바구니가 브랜드로고로 인지될 수 있을 것 같은데 확인해줘. 컬러변경은 가능해. 1. 운영 적용 하되 멍트리는 크리스마스 시즌 톤앤무드를 유지하자. 2. 확인했어. 한가지는 좀 더 고민하고 알려줘. 교차오염 고지> 시설 주의 의 경우엔 시설 주의가…",
+     "This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation. Summary:…",
+     "변경되는 디자인 시안을 목업 형태로 보여줘. 모바일 기준으로 보여주면 돼.",
+     "오.. 너무 컨셉에 잡아 먹힌것 같아. 그래도 좀 더 프로페셔널한 느낌을 줘야하는데 너무 장난감 같아. [Image #1] [Image #2] [Image #3] [Image #4] [Image #5] [Image #6] 토스커머스를 레퍼런스 삼아서 전체적인 미감을 디밸롭하자. 여기에…",
+     "확인했어. 디자인 리뉴얼 작업 실행하고 실서버 배포까지 완료하자.",
+     "응, 아이콘이랑 제품 목록 페이지도 v3로 맞춰줘"
+    ],
+    "status": "앱 아이콘과 전체 제품 목록 페이지도 v3로 바꿔 실서버에 배포했습니다(`c75e102`). 실서버에서 목록 페이지에 새 구조가 들어간 것, 아이콘 파일이 코발트로 바뀐 것을 확인했습니다. 로직 테스트와 화면 점검은 배포 전에 모두 통과했습니다. ## 앱 아이콘 - **모양은 그대로 두고 색만 바꿨습니다.** 청록 바탕은 코발트로, 코랄 체크는 노랑으로 바꿨고 돋보기는 흰색 그대로입니다. 테두리의 부드러운 경계도 원래대로 유지됩니다. - 파비콘, 홈 화면 아이콘(iOS·Android), 검색결과에 쓰이는 로고까지 아이콘 파일 5개를 모두 바꿨습니다. - 앱 실행 화면 바탕색과 상단 막대 색도 흰색으로 맞췄습니다. ## 전체 제품 목록 (`/products/`) | 전 | 후 | |---|---| | 글자만 있는 로고 | 로고 마크 + 이름 |…",
+    "ts": "2026-11-04T15:58:59.942Z",
+    "last": "11-05 00:58"
    }
   ],
   "stray": [
@@ -808,7 +766,7 @@
    "c": "운영 weallrightmypet.com",
    "ch": [
     [
-     "Orca 세션 ×6",
+     "Orca 세션 ×5",
      "shared"
     ]
    ],
@@ -979,7 +937,7 @@
  "suggestions": [
   [
    "Claude 세션",
-   "9개 동시 열림",
+   "8개 동시 열림",
    "오늘 쓰는 2개만 남기고 나머지는 handoff 메모 후 닫기",
    "Pro 한도 보호"
   ],
