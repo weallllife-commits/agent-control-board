@@ -172,7 +172,8 @@ def collect_orca(prev):
         clean = title.lstrip("✳◐◑◒◓⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏ ").strip() or "(제목 없음)"
         by_path.setdefault(norm(t.get("worktreePath")), []).append({
             "title": clean, "last": fmt_ts(t.get("lastOutputAt")),
-            "agent": t.get("agentIdentity") or "shell", "working": working})
+            "agent": t.get("agentIdentity") or "shell", "working": working,
+            "pane": f"{t.get('tabId')}:{t.get('leafId')}"})
 
     repos, stray, seen_names = {}, [], Counter()
     for w in wts.get("worktrees", []):
@@ -209,6 +210,29 @@ def collect_orca(prev):
     active.sort(key=lambda r: -r["sessions"])
     loose = [t for p, ts in by_path.items() for t in ts]
     dupes = sorted(n for n, c in seen_names.items() if c > 1)
+
+    # 폴더 워크스페이스(경로가 홈 폴더라 worktreePath가 비는 것)는 worktree ps의 paneKey로 터미널을 붙인다
+    ps = orca("worktree", "ps") or {}
+    pane_ws, folders = {}, {}
+    for w in ps.get("worktrees", []):
+        if w.get("workspaceKind") != "folder-workspace" or w.get("isArchived"):
+            continue
+        name = w.get("displayName") or "폴더 워크스페이스"
+        folders[name] = {"name": name, "status": w.get("workspaceStatus") or "in-progress",
+                         "last": fmt_ts(w.get("lastActivityAt")), "lastMs": w.get("lastActivityAt") or 0,
+                         "path": norm(w.get("path")), "terms": []}
+        for a in w.get("agents", []):
+            pane_ws[a.get("paneKey")] = name
+    rest = []
+    for t in loose:
+        ws = pane_ws.get(t.get("pane"))
+        (folders[ws]["terms"] if ws else rest).append(t)
+    loose = rest
+    if folders:
+        fw = sorted(folders.values(), key=lambda x: (-len(x["terms"]), -x["lastMs"]))
+        active.insert(0, {"name": "폴더 워크스페이스 (홈)", "worktrees": fw,
+                          "sessions": sum(len(x["terms"]) for x in fw)})
+        active.sort(key=lambda r: -r["sessions"])
 
     # 워크트리·세션별 진행 중인 작업: 터미널 제목 = 세션 제목으로 우선 매칭, 없으면 같은 폴더의 최신 세션
     sess = collect_sessions()
